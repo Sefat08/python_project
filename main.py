@@ -87,6 +87,9 @@ def determine_output():
         data = {
             "station_name": row["Stationsname"].strip(),
             "bundesland": row["Bundesland"].strip(),
+            "latitude": row["geogr. Breite"],
+            "longitude": row["geogr. Laenge"],
+            "station_height": row["Stationshoehe"],
         }
 
         results[row["Stations_id"]] = data
@@ -120,6 +123,9 @@ def determine_output():
             f"{index}. Station_ID: {key}\n"
             f"   Station: {value.get('station_name', 'N/A')}\n"
             f"   State: {value.get('bundesland', 'N/A')}\n"
+            f"   Latitude: {value.get('latitude', 'N/A')}\n"
+            f"   Longitude: {value.get('longitude', 'N/A')}\n"
+            f"   Station Height: {value.get('station_height', 'N/A')}\n"
             f"   Average Temperature: {value.get('average_temperature', 'N/A')}\n"
             f"   Average Precipitation: {value.get('average_precipitation', 'N/A')}\n"
         )
