@@ -40,6 +40,10 @@ precipitation_data = pd.read_csv(
     os.path.join(DATA_DIRECTORY, "precipitation_data.csv"), encoding="utf-8"
 )
 
+sunshine_data = pd.read_csv(
+    os.path.join(DATA_DIRECTORY, "sunshine_data.csv"), encoding="utf-8"
+)
+
 
 def get_matching_stations(station_list, station_name):
     matching_stations = []
@@ -73,12 +77,24 @@ def get_precipitation(matching_stations):
     return matching_rows
 
 
+def get_suhsine(matching_stations):
+    matching_rows = []
+    for row in matching_stations:
+        station_id = row["Stations_id"]
+
+        for _, p_row in sunshine_data.iterrows():
+            if p_row["Stations_id"] == station_id:
+                matching_rows.append(p_row)
+    return matching_rows
+
+
 def determine_output():
     station_name = input("Enter the name of the station: ").strip().lower()
 
     matching_stations = get_matching_stations(station_list, station_name)
     matching_temperatures = get_temperature(matching_stations)
     matching_precipitaitons = get_precipitation(matching_stations)
+    matching_sunshine = get_suhsine(matching_stations)
 
     results = {}
 
@@ -118,6 +134,18 @@ def determine_output():
         average_precipitation = round(accumulated_precipitation / 12, 2)
         results[row["Stations_id"]]["average_precipitation"] = average_precipitation
 
+    for row in matching_sunshine:
+        accumulated_sunshine = 0
+        if row["Stations_id"] in results:
+            for column, value in row.items():
+                match = difflib.get_close_matches(column, MONTHS_LIST, n=1, cutoff=0.6)
+
+                if match:
+                    accumulated_sunshine += float(value)
+
+        average_precipitation = round(accumulated_sunshine / 12, 2)
+        results[row["Stations_id"]]["average_sunshine"] = average_precipitation
+
     for index, (key, value) in enumerate(results.items(), start=1):
         print(
             f"{index}. Station_ID: {key}\n"
@@ -125,9 +153,10 @@ def determine_output():
             f"   State: {value.get('bundesland', 'N/A')}\n"
             f"   Latitude: {value.get('latitude', 'N/A')}\n"
             f"   Longitude: {value.get('longitude', 'N/A')}\n"
-            f"   Station Height: {value.get('station_height', 'N/A')}\n"
-            f"   Average Temperature: {value.get('average_temperature', 'N/A')}\n"
-            f"   Average Precipitation: {value.get('average_precipitation', 'N/A')}\n"
+            f"   Station Height: {value.get('station_height', 'N/A')} Meter\n"
+            f"   Average Temperature: {value.get('average_temperature', 'N/A')} Degrees \n"
+            f"   Average Precipitation: {value.get('average_precipitation', 'N/A')} MM/Year\n"
+            f"   Average Sunshine: {value.get('average_sunshine', 'N/A')} Hours\n"
         )
 
 
