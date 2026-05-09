@@ -86,16 +86,6 @@ This LLD documents covers RBAC requirements, detailed RBAC structure, RBAC confi
 
 The intended audience for this document will be UNIPER architects and UNIPER Enterprise Scale@Uniper project management.
 
-### Role Based Access Control
-
-A control is a safeguard or countermeasure designed to preserve Confidentiality, Integrity and Availability of data. This, of course, is the CIA Triad.
-
-Access control involves limiting what objects can be available to what subjects according to what rules.
-
-Access controls are not just about restricting access to information systems and data, but also about allowing access. It is about granting the appropriate level of access to authorized personnel and processes and denying access to unauthorized functions or individuals.
-
-Role-based access control provides each application team member/HaCT Cloud Engineer privileges based on what role they have in the organization.
-
 ## 3. Design Goals & Non-Goals
 
 ### In Scope – Out scope of HaCT & Application Team
@@ -951,6 +941,16 @@ The service principle has below 2 access granted to perform the required operati
 ## 13. References
 
 ## 14. Source-only sections
+
+### Role Based Access Control
+
+A control is a safeguard or countermeasure designed to preserve Confidentiality, Integrity and Availability of data. This, of course, is the CIA Triad.
+
+Access control involves limiting what objects can be available to what subjects according to what rules.
+
+Access controls are not just about restricting access to information systems and data, but also about allowing access. It is about granting the appropriate level of access to authorized personnel and processes and denying access to unauthorized functions or individuals.
+
+Role-based access control provides each application team member/HaCT Cloud Engineer privileges based on what role they have in the organization.
 
 ### Appendix – A Glossary
 
