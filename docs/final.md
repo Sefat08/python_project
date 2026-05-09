@@ -1,7 +1,5 @@
 # Architecture & Design Document
 
-> Migrated from source Word document. Original information flow is preserved. Images are stored in the `images/` folder and referenced from this Markdown file.
-
 ## 1. Document Metadata
 
 ### Front Matter
@@ -34,6 +32,10 @@ Table 1: Document Information
 
 Table 2: Distribution List
 
+### Audience
+
+The intended audience for this document will be UNIPER architects and UNIPER Enterprise Scale@Uniper project management.
+
 ## 2. Problem Statement
 
 ### Overview
@@ -42,45 +44,33 @@ Uniper has Azure AD at present, which is synced with On-Premises active director
 
 Role-based access control provides each worker privileges based on what role they have in the organization.
 
-### Introduction
-
-Uniper uses Conditional Access and Azure Identity Protection policies to enforce Azure Multi-Factor Authentication (MFA), to block unsupported and incompliant device platforms and to block risky sign-in attempts.
-
-During unforeseen circumstances such as a natural disaster emergency, during which a mobile phone or other networks might be unavailable
-
-In the worst case, these scenarios can block out users and administrator.
-
-Emergency access accounts, often referred to as “break glass accounts”, is an important part of an organization’s disaster recovery plan. These accounts are highly privileged and should only be used when normal admin accounts can’t sign in to gain access to a system or service.
-
 ## 3. Design Goals & Non-Goals
 
 ### Purpose
 
 This LLD documents covers RBAC requirements, detailed RBAC structure, RBAC configurations and maintenance of these RBAC infrastructure which will be deployed in Enterprise Scale@Uniper, its management groups and landing zone subscriptions.
 
-### Purpose
+### Custom Role Creation
 
-To have historic data of all Azure Role Assignments on a particular day
+| Responsibilities | Responsibilities |
+| --- | --- |
+| Application Team | HaCT Team |
+| Not to create custom role, in most of the use case Contributor access will be sufficient for SPN to deploy/create/modify/update/delete. | When App team creates custom role, Custom role is also will be removed. App Team must place consultation call with HaCT Security & IAM team. In case of valid business justification, Post Service Owner, Application Team will be allowed to create custom role. |
+| In case of custom role, request you to take consultation call with HaCT Security & IAM Team |  |
 
-Quickly view and compare the Role assignment changes between a time
+Table 9: In/Out Scope - Custom Role creation
 
-Easily find out all the Role Assignments done for a particulate User/Group/Service Principle or on an Azure Resource
+## 4. Architecture Overview
 
-Analysis for Role Assignment clean-up
+### Role Based Access Control
 
-### Purpose
+A control is a safeguard or countermeasure designed to preserve Confidentiality, Integrity and Availability of data. This, of course, is the CIA Triad.
 
-To have historic data of all members of AD groups which has role assignment across PCFv2 estate on a particular day
+Access control involves limiting what objects can be available to what subjects according to what rules.
 
-Quickly view and compare the memberships of AD Groups changes between a time period
+Access controls are not just about restricting access to information systems and data, but also about allowing access. It is about granting the appropriate level of access to authorized personnel and processes and denying access to unauthorized functions or individuals.
 
-Analysis of Members of AD Groups and cleanup.
-
-## 4. Audience
-
-The intended audience for this document will be UNIPER architects and UNIPER Enterprise Scale@Uniper project management.
-
-## 5. Architecture Overview
+Role-based access control provides each application team member/HaCT Cloud Engineer privileges based on what role they have in the organization.
 
 ### Azure Enterprise Scale@Uniper Architecture
 
@@ -104,73 +94,6 @@ Figure 3: ES@Uniper - Application Team Access
 
 Remark: Detailed explanation regarding the default role is provided under the section 9.
 
-### AS-IS – Break-Glass account Architecture
-
-![Figure 5](images/source_062_figure_5.png)
-
-Figure 4: Break-Glass account Access Framework
-
-### Technical Details
-
-This is achieved through a PowerShell Script. The script is configured via an Azure DevOps pipeline. It scheduled to run daily and when the run is completed it generates an Excel file with all current Role assignment details on UPCFv2 Management group, and then upload the excel file to an Azure Storage Account.
-There is a service principle configured which has Reader access to UPCFv2 Management Group.
-
-### Azure Resources
-
-A report will be uploaded to a container. The information about the storage account and related container is provided below.
-
-Storage Account: hactsecuritysto001
-
-Storage Container: upcfv2roleassignments
-
-DevOps Git URL: RoleAssignments - Repos (azure.com)
-
-DevOps Pipeline: Pipelines - Runs for Azure Role Assignment Backup UPCFv2
-
-### Technical Details
-
-This is achieved through a PowerShell Script. The script is configured via an Azure DevOps pipeline. It scheduled to run daily and when the run is completed it generates an Excel file with all lists of members of AD Group which has role assignment across all scope from PCFv2 environment and then upload the excel file to an Azure Storage Account.
-There is a service principle configured which has Reader access to UPCFv2 Management Group.
-
-### Azure Resources
-
-A report will be uploaded to a container. The information about the storage account and related container is provided below.
-
-Storage Account: hactsecuritysto001
-
-Storage Container: <TBD>
-
-DevOps Git URL: <TBD>
-
-DevOps Pipeline: <TBD>
-
-## 6. Design Options Considered
-
-## 7. Chosen Design & Rationale
-
-## 8. Security, HA & DR Considerations
-
-### Role Assignment
-
-| Responsibilities | Responsibilities |
-| --- | --- |
-| Application Team | HaCT Team |
-| App Team's responsible to perform the role assignment for themselves on-demand | HaCT Team will be working on to identify other critical roles. If HaCT identifies Critical role, it will get appended to the list. |
-| Application team are requested to use the Least privilege principle and perform the role assignment. Recommendation from HaCT is to check resource specific role and assign what is required to perform the activity.<br>Critical/High Privilege role - “Owner, User Access Administrator, Resource Policy Contributor “are requested not use across ESLZ subscriptions/Resource Groups/Resources | If in case mentioned role assignments are identified during audit process, HaCT Team will removing immediately |
-|  | On noticing role assignments apart from Reader for Application team members in PROD subscription, HaCT Team will be removing the respective role assignment. |
-
-Table 8: In/Out Scope - Role Assignment
-
-### Custom Role Creation
-
-| Responsibilities | Responsibilities |
-| --- | --- |
-| Application Team | HaCT Team |
-| Not to create custom role, in most of the use case Contributor access will be sufficient for SPN to deploy/create/modify/update/delete. | When App team creates custom role, Custom role is also will be removed. App Team must place consultation call with HaCT Security & IAM team. In case of valid business justification, Post Service Owner, Application Team will be allowed to create custom role. |
-| In case of custom role, request you to take consultation call with HaCT Security & IAM Team |  |
-
-Table 9: In/Out Scope - Custom Role creation
-
 ### RBAC – Application Team
 
 | Role Name | Type | Description |
@@ -182,6 +105,108 @@ Table 9: In/Out Scope - Custom Role creation
 | Storage Blob Data Reader | Built-in | Allows for read access to Azure Storage blob containers and data |
 
 Table 10: App Team - Default Role Description
+
+### HaCT – Cloud Engineer - Role Specific Access
+
+| HaCT Stream | Access - Role | Scope of Access | PIM (Yes/No) | PAG - PIM Security AD Group |
+| --- | --- | --- | --- | --- |
+| HaCT- Security IAM | User Access Administrator | PCFv2 Management Group | Yes | AZ-HaCT-PIM-Security Team |
+| HaCT- Governance | Resource Policy Contributor | PCFv2 Management Group | Yes | AZ-HaCT-PIM-Governance Team |
+| HaCT- Governance | User Access Administrator | PCFv2 Management Group | Yes | AZ-HaCT-PIM-Governance Team |
+| HaCT- Network Admins | Network Contributor | PCFv2 Management Group | Yes | AZ-OurConnectivity-PIM-Cloud Network Team |
+| HaCT- Monitoring Admin | Monitoring Contributor | PCFv2 Management Group | Yes | AZ-HaCT-PIM-Monitoring Team |
+| HaCT - Contributor | Contributor | PCFv2 Management Group | Yes | AZ-HaCT-PIM-UPCFv2-CONTRIBUTOR |
+
+Table 15: HaCT Cloud Engineer - Role Specific Access
+
+Business Justification/Reason of above role assignments:
+
+HaCT- Security IAM – To perform create/delete role assignment across PCFv2
+
+HaCT- Governance – To deploy/support Policy in PCFv2 estate
+
+HaCT- Network Admins – To deploy network components like VNet, subnet, VNet Peering, to support Application team member during their Network components deployment
+
+HaCT- Monitoring Admin – Configure Alerts, alert rule, action groups
+
+HaCT – Contributor – To create resource group for HaCT internal purpose if required (on-demand).
+
+Remarks
+
+Except “AZ-HaCT-PIM-UPCFv2-CONTRIBUTOR “all the other PAG AD Groups mentioned in the above Table are used to grant access to HaCT Cloud Engineers in PCFv1 as well as in ES@Uniper.
+
+### HaCT – Automation Service Principal - Role Specific Access
+
+| HaCT Stream | Access - Role | Scope of Access | PIM (Yes/No) |
+| --- | --- | --- | --- |
+| HaCT- Automation - SP | Contributor | PCFv2 Management Group | -NA- |
+| HaCT- Automation - SP | User Access Administrator | PCFv2 Management Group | -NA- |
+
+Table 16: HaCT Platform Automation - Service Principal Access
+
+Business Justification/Reason of SP role assignments:
+
+Contributor – To create subscriptions (subscription-Lifecycle), storage account to store deployment state files
+
+User Access Administrator – To perform create/delete role assignment of Application Team
+
+### AS-IS – Break-Glass account Architecture
+
+![Figure 5](images/source_062_figure_5.png)
+
+Figure 4: Break-Glass account Access Framework
+
+### Role Assignment – scope – Tenant
+
+Below is the list of role assignments which are inherited from the scope of Tenant.
+
+| DisplayName | RoleDefinitionName | ObjectType | Comments |
+| --- | --- | --- | --- |
+| 89c1d63b423a47d58f7f2929 | Website Contributor | ServicePrincipal | Policy Assignment |
+| 8f78da66f15a4bbe8e13fbec | Backup Contributor | ServicePrincipal | Policy Assignment |
+| 8f78da66f15a4bbe8e13fbec | Virtual Machine Contributor | ServicePrincipal | Policy Assignment |
+| 93f538cecd934a278ee7ddd3 | Contributor | ServicePrincipal | Policy Assignment |
+| AZ-F_OI2-E3-Security Administrator-CDC-Team | HaCT \| Security Administrator \| Defender for Cloud Alerts | Group | Uniper CDC Team access |
+| AZ-F_OI3-B4-Cost-Management-Reader | HaCT-Cost Management Reader | Group | Application Managers are granted with Cost Management access |
+| AZ-HaCT-PIM-Owner | Owner | Group | Subscription Owner |
+| AZ-HaCT-PIM-Security Team | User Access Administrator | Group | HaCT Security and IAM Team |
+| AZ-HaCT-PIM-UAM Access | User Access Administrator | Group | Subscription Owner |
+| AZ-Tenant Root Management Group Reader-HaCT | Reader | Group | Azure LightHouse AD Groups from scope of Tenant |
+| AZ-Tenant Root Management Group Reader-Others | Reader | Group | Azure LightHouse AD Groups from scope of Tenant |
+| azmonreschealth-prd-logicapp-001 | Reader | ServicePrincipal | * |
+| azmonreschealth-rich | Reader | ServicePrincipal | * |
+| b418938ccd924c8eada965a6 | Website Contributor | ServicePrincipal | Policy Assignment |
+| Cloud Security Services \| PROD \| BSN0003595 \| General Automation | Reader | ServicePrincipal | Security and IAM Pipeline Devops service principal |
+| Cloud Security Services \| PROD \| BSN0003595 \| General Automation | Reader | ServicePrincipal | Security and IAM Pipeline Devops service principal |
+| CloudWorks Automation Services \| PROD \| bsn0001358 \| CloudWorks ESLZ Automation | Contributor | ServicePrincipal | HaCT Automation team's service principal |
+| CMCAzurePortal \| PROD \| 200188 | Reader | ServicePrincipal | HaCT Automation team's service principal |
+| testexport | Reader | ServicePrincipal | * |
+| reservationchecker | Reader | ServicePrincipal | * |
+| cmdbextract | Azure Kubernetes Service RBAC Reader | ServicePrincipal | * |
+| cmdbextract | Website Contributor | ServicePrincipal | * |
+| cmdbextract | Reader | ServicePrincipal | * |
+| cmdbextract | Virtual Machine Contributor | ServicePrincipal | * |
+| cmdbextract2 | Azure Kubernetes Service Cluster User Role | ServicePrincipal | * |
+| cmdbextract2 | Azure Kubernetes Service Contributor Role | ServicePrincipal | * |
+| cmdbextract2 | Azure Kubernetes Service Cluster Admin Role | ServicePrincipal | * |
+| cmdbextract2 | Azure Kubernetes Service RBAC Cluster Admin | ServicePrincipal | * |
+| cmdbextract2 | Reader | ServicePrincipal | * |
+| cmdbextract2 | Virtual Machine Contributor | ServicePrincipal | * |
+| cmdbextract3 | Reader | ServicePrincipal | * |
+| cmdbextract3 | Virtual Machine Contributor | ServicePrincipal | * |
+| cmdbkaren | Reader | ServicePrincipal | * |
+| d62fc8165cfa45c3b2596861 | Contributor | ServicePrincipal | Policy Assignment |
+| Mandiant ASM | Reader | ServicePrincipal | * |
+| Stolcz, Tamas, T13508@uniper.energy | Owner | User | Subscription Owner |
+| Stolcz, Tamas (CMC - Service Admin), tamas.stolcz_outlook.com#EXT#@Uniper.onmicrosoft.com | Owner | User | Subscription Owner |
+
+Table 29: Existing - Role Assignment
+
+Remarks: * - The justification for the role assignment must be examined and documented.
+
+## 5. Design Options Considered
+
+## 6. Chosen Design & Rationale
 
 ### Lower Environment – DEV/SANDBOX
 
@@ -252,49 +277,7 @@ AD Group creation and Role Assignment for HaCT Cloud Engineer are manually perfo
 
 PIM implementation of Role Specific access for HaCT Cloud Engineers are manually done by UIT HaCT Security Services uit-hact-security-services@uniper.energy
 
-### HaCT – Cloud Engineer - Role Specific Access
-
-| HaCT Stream | Access - Role | Scope of Access | PIM (Yes/No) | PAG - PIM Security AD Group |
-| --- | --- | --- | --- | --- |
-| HaCT- Security IAM | User Access Administrator | PCFv2 Management Group | Yes | AZ-HaCT-PIM-Security Team |
-| HaCT- Governance | Resource Policy Contributor | PCFv2 Management Group | Yes | AZ-HaCT-PIM-Governance Team |
-| HaCT- Governance | User Access Administrator | PCFv2 Management Group | Yes | AZ-HaCT-PIM-Governance Team |
-| HaCT- Network Admins | Network Contributor | PCFv2 Management Group | Yes | AZ-OurConnectivity-PIM-Cloud Network Team |
-| HaCT- Monitoring Admin | Monitoring Contributor | PCFv2 Management Group | Yes | AZ-HaCT-PIM-Monitoring Team |
-| HaCT - Contributor | Contributor | PCFv2 Management Group | Yes | AZ-HaCT-PIM-UPCFv2-CONTRIBUTOR |
-
-Table 15: HaCT Cloud Engineer - Role Specific Access
-
-Business Justification/Reason of above role assignments:
-
-HaCT- Security IAM – To perform create/delete role assignment across PCFv2
-
-HaCT- Governance – To deploy/support Policy in PCFv2 estate
-
-HaCT- Network Admins – To deploy network components like VNet, subnet, VNet Peering, to support Application team member during their Network components deployment
-
-HaCT- Monitoring Admin – Configure Alerts, alert rule, action groups
-
-HaCT – Contributor – To create resource group for HaCT internal purpose if required (on-demand).
-
-Remarks
-
-Except “AZ-HaCT-PIM-UPCFv2-CONTRIBUTOR “all the other PAG AD Groups mentioned in the above Table are used to grant access to HaCT Cloud Engineers in PCFv1 as well as in ES@Uniper.
-
-### HaCT – Automation Service Principal - Role Specific Access
-
-| HaCT Stream | Access - Role | Scope of Access | PIM (Yes/No) |
-| --- | --- | --- | --- |
-| HaCT- Automation - SP | Contributor | PCFv2 Management Group | -NA- |
-| HaCT- Automation - SP | User Access Administrator | PCFv2 Management Group | -NA- |
-
-Table 16: HaCT Platform Automation - Service Principal Access
-
-Business Justification/Reason of SP role assignments:
-
-Contributor – To create subscriptions (subscription-Lifecycle), storage account to store deployment state files
-
-User Access Administrator – To perform create/delete role assignment of Application Team
+## 7. Security, HA & DR Considerations
 
 ### Azure AD Role – HaCT Security and IAM Team
 
@@ -324,6 +307,10 @@ Table 17: Azure AD Role - HaCT Security and IAM Team
 |  |  |  |
 
 Table 20: Role Description
+
+### Permission Details of role
+
+This section is about the permission details of each role from the section 5 and section 6
 
 ### Reader-Permissions
 
@@ -385,6 +372,16 @@ actions:
 
 | "Microsoft.Authorization/*/read”,<br>"Microsoft.Insights/alertRules/*”,<br>"Microsoft.Network/*”,<br>"Microsoft.ResourceHealth/availabilityStatuses/read”,<br>"Microsoft.Resources/deployments/*”,<br>"Microsoft.Resources/subscriptions/resourceGroups/read”,<br>"Microsoft.Support/*” |
 | --- |
+
+### Introduction
+
+Uniper uses Conditional Access and Azure Identity Protection policies to enforce Azure Multi-Factor Authentication (MFA), to block unsupported and incompliant device platforms and to block risky sign-in attempts.
+
+During unforeseen circumstances such as a natural disaster emergency, during which a mobile phone or other networks might be unavailable
+
+In the worst case, these scenarios can block out users and administrator.
+
+Emergency access accounts, often referred to as “break glass accounts”, is an important part of an organization’s disaster recovery plan. These accounts are highly privileged and should only be used when normal admin accounts can’t sign in to gain access to a system or service.
 
 ### Account Configuration
 
@@ -518,69 +515,7 @@ Table 27:  Security Initiative - SQL PAAS
 
 Table 28:  Security Initiative – KeyVault
 
-### Role Assignment – scope – Tenant
-
-Below is the list of role assignments which are inherited from the scope of Tenant.
-
-| DisplayName | RoleDefinitionName | ObjectType | Comments |
-| --- | --- | --- | --- |
-| 89c1d63b423a47d58f7f2929 | Website Contributor | ServicePrincipal | Policy Assignment |
-| 8f78da66f15a4bbe8e13fbec | Backup Contributor | ServicePrincipal | Policy Assignment |
-| 8f78da66f15a4bbe8e13fbec | Virtual Machine Contributor | ServicePrincipal | Policy Assignment |
-| 93f538cecd934a278ee7ddd3 | Contributor | ServicePrincipal | Policy Assignment |
-| AZ-F_OI2-E3-Security Administrator-CDC-Team | HaCT \| Security Administrator \| Defender for Cloud Alerts | Group | Uniper CDC Team access |
-| AZ-F_OI3-B4-Cost-Management-Reader | HaCT-Cost Management Reader | Group | Application Managers are granted with Cost Management access |
-| AZ-HaCT-PIM-Owner | Owner | Group | Subscription Owner |
-| AZ-HaCT-PIM-Security Team | User Access Administrator | Group | HaCT Security and IAM Team |
-| AZ-HaCT-PIM-UAM Access | User Access Administrator | Group | Subscription Owner |
-| AZ-Tenant Root Management Group Reader-HaCT | Reader | Group | Azure LightHouse AD Groups from scope of Tenant |
-| AZ-Tenant Root Management Group Reader-Others | Reader | Group | Azure LightHouse AD Groups from scope of Tenant |
-| azmonreschealth-prd-logicapp-001 | Reader | ServicePrincipal | * |
-| azmonreschealth-rich | Reader | ServicePrincipal | * |
-| b418938ccd924c8eada965a6 | Website Contributor | ServicePrincipal | Policy Assignment |
-| Cloud Security Services \| PROD \| BSN0003595 \| General Automation | Reader | ServicePrincipal | Security and IAM Pipeline Devops service principal |
-| Cloud Security Services \| PROD \| BSN0003595 \| General Automation | Reader | ServicePrincipal | Security and IAM Pipeline Devops service principal |
-| CloudWorks Automation Services \| PROD \| bsn0001358 \| CloudWorks ESLZ Automation | Contributor | ServicePrincipal | HaCT Automation team's service principal |
-| CMCAzurePortal \| PROD \| 200188 | Reader | ServicePrincipal | HaCT Automation team's service principal |
-| testexport | Reader | ServicePrincipal | * |
-| reservationchecker | Reader | ServicePrincipal | * |
-| cmdbextract | Azure Kubernetes Service RBAC Reader | ServicePrincipal | * |
-| cmdbextract | Website Contributor | ServicePrincipal | * |
-| cmdbextract | Reader | ServicePrincipal | * |
-| cmdbextract | Virtual Machine Contributor | ServicePrincipal | * |
-| cmdbextract2 | Azure Kubernetes Service Cluster User Role | ServicePrincipal | * |
-| cmdbextract2 | Azure Kubernetes Service Contributor Role | ServicePrincipal | * |
-| cmdbextract2 | Azure Kubernetes Service Cluster Admin Role | ServicePrincipal | * |
-| cmdbextract2 | Azure Kubernetes Service RBAC Cluster Admin | ServicePrincipal | * |
-| cmdbextract2 | Reader | ServicePrincipal | * |
-| cmdbextract2 | Virtual Machine Contributor | ServicePrincipal | * |
-| cmdbextract3 | Reader | ServicePrincipal | * |
-| cmdbextract3 | Virtual Machine Contributor | ServicePrincipal | * |
-| cmdbkaren | Reader | ServicePrincipal | * |
-| d62fc8165cfa45c3b2596861 | Contributor | ServicePrincipal | Policy Assignment |
-| Mandiant ASM | Reader | ServicePrincipal | * |
-| Stolcz, Tamas, T13508@uniper.energy | Owner | User | Subscription Owner |
-| Stolcz, Tamas (CMC - Service Admin), tamas.stolcz_outlook.com#EXT#@Uniper.onmicrosoft.com | Owner | User | Subscription Owner |
-
-Table 29: Existing - Role Assignment
-
-Remarks: * - The justification for the role assignment must be examined and documented.
-
-## 9. Role Based Access Control
-
-A control is a safeguard or countermeasure designed to preserve Confidentiality, Integrity and Availability of data. This, of course, is the CIA Triad.
-
-Access control involves limiting what objects can be available to what subjects according to what rules.
-
-Access controls are not just about restricting access to information systems and data, but also about allowing access. It is about granting the appropriate level of access to authorized personnel and processes and denying access to unauthorized functions or individuals.
-
-Role-based access control provides each application team member/HaCT Cloud Engineer privileges based on what role they have in the organization.
-
-## 10. Permission Details of role
-
-This section is about the permission details of each role from the section 5 and section 6
-
-## 11. Operational Implications
+## 8. Operational Implications
 
 ### RACI Matrix for Landing Zone subscriptions
 
@@ -626,6 +561,17 @@ Table 6: In/Out Scope - Access for App Team members
 
 Table 7: In/Out Scope - Creation/Deletion new AD Group
 
+### Role Assignment
+
+| Responsibilities | Responsibilities |
+| --- | --- |
+| Application Team | HaCT Team |
+| App Team's responsible to perform the role assignment for themselves on-demand | HaCT Team will be working on to identify other critical roles. If HaCT identifies Critical role, it will get appended to the list. |
+| Application team are requested to use the Least privilege principle and perform the role assignment. Recommendation from HaCT is to check resource specific role and assign what is required to perform the activity.<br>Critical/High Privilege role - “Owner, User Access Administrator, Resource Policy Contributor “are requested not use across ESLZ subscriptions/Resource Groups/Resources | If in case mentioned role assignments are identified during audit process, HaCT Team will removing immediately |
+|  | On noticing role assignments apart from Reader for Application team members in PROD subscription, HaCT Team will be removing the respective role assignment. |
+
+Table 8: In/Out Scope - Role Assignment
+
 ### How are Security AD Groups created?
 
 Application Owners and Team Members order subscriptions by submitting requests to create subscriptions using catalogue services.
@@ -637,43 +583,6 @@ Remarks: * Owned/Supported HaCT Automation Team
 Detailed explanation about IaC will be covered in Low level design of HaCT Platform automation
 
 AD Group creation and Role Assignment for application team are automated.
-
-### Naming Convention
-
-PCFv2 security AD group convention pattern is used.
-
-AZ-              PCFv2-CORP-DEV-C_MA3-DTFU081-01-           READER
-
-| Azure | Subscription Name | Role Name |
-| --- | --- | --- |
-
-AZ-<Subscription name>-READER
-
-AZ-<Subscription name>-CONTRIBUTOR
-
-Example:
-
-DEV Environment
-
-Subscription Name - "PCFv2-CORP-DEV-C_MA3-DTFU081-01"
-
-AD Group Name - AZ-PCFv2-CORP-DEV-C_MA3-DTFU081-01-READER
-
-Group Description - [CreatedBy:HaCT][CreatedFor:<EAMID of Application>] Granting Reader access for users on subscription.
-
-AD Group Name - AZ-PCFv2-CORP-DEV-C_MA3-DTFU081-01-CONTRIBUTOR
-
-Group Description - [CreatedBy:HaCT][CreatedFor:<EAMID of Application>] Granting Contributor access for users on subscription.
-
-PROD Environment
-
-Subscription Name - "PCFv2-CORP-PRD-C_MA3-DTFU081-01"
-
-AD Group Name - AZ-PCFv2-CORP-PRD-C_MA3-DTFU081-01-READER
-
-Group Description - [CreatedBy:HaCT][CreatedFor:<EAMID of Application>] Granting Reader access for users on subscription.
-
-Remarks: Security AD Group created are only used for the purpose of ES@Uniper RBAC for application team members.
 
 ### Azure AD Group Ownership and Membership
 
@@ -816,17 +725,63 @@ Password - The password for the Break-Glass account is shared between two teams.
 
 Table 22: PoC for Emergency account
 
-### Validation – Break Glass account
+### Purpose
 
-The procedure should be trained at least twice a year to make sure that everyone involved is aware of what to do in case of an emergency. As a result, every time it cannot be ruled out that one individual has access to both parts of the password, the password is changed.
+To have historic data of all Azure Role Assignments on a particular day
 
-Discuss and Plan  with Service Owner on validation/training of Break Glass account.
+Quickly view and compare the Role assignment changes between a time
+
+Easily find out all the Role Assignments done for a particulate User/Group/Service Principle or on an Azure Resource
+
+Analysis for Role Assignment clean-up
+
+### Technical Details
+
+This is achieved through a PowerShell Script. The script is configured via an Azure DevOps pipeline. It scheduled to run daily and when the run is completed it generates an Excel file with all current Role assignment details on UPCFv2 Management group, and then upload the excel file to an Azure Storage Account.
+There is a service principle configured which has Reader access to UPCFv2 Management Group.
+
+### Azure Resources
+
+A report will be uploaded to a container. The information about the storage account and related container is provided below.
+
+Storage Account: hactsecuritysto001
+
+Storage Container: upcfv2roleassignments
+
+DevOps Git URL: RoleAssignments - Repos (azure.com)
+
+DevOps Pipeline: Pipelines - Runs for Azure Role Assignment Backup UPCFv2
 
 ### Scheduler/Pipeline Trigger Details
 
 Days: Monday - Sunday
 
 Time: 4.00 PM CET
+
+### Purpose
+
+To have historic data of all members of AD groups which has role assignment across PCFv2 estate on a particular day
+
+Quickly view and compare the memberships of AD Groups changes between a time period
+
+Analysis of Members of AD Groups and cleanup.
+
+### Technical Details
+
+This is achieved through a PowerShell Script. The script is configured via an Azure DevOps pipeline. It scheduled to run daily and when the run is completed it generates an Excel file with all lists of members of AD Group which has role assignment across all scope from PCFv2 environment and then upload the excel file to an Azure Storage Account.
+There is a service principle configured which has Reader access to UPCFv2 Management Group.
+
+### Azure Resources
+
+A report will be uploaded to a container. The information about the storage account and related container is provided below.
+
+Storage Account: hactsecuritysto001
+
+Storage Container: <TBD>
+
+DevOps Git URL: <TBD>
+
+DevOps Pipeline: <TBD>
 
 ### Scheduler/Pipeline Trigger Details
 
@@ -846,7 +801,74 @@ AD Group creation and Role Assignment for HaCT Cloud Engineer are manually perfo
 
 Application Managers must assess permitted users and give application team members access.
 
-## 12. Appendix – A Glossary
+## 9. Risks & Assumptions
+
+## 10. Design Constraints & Dependencies (OPTIONAL)
+
+### Naming Convention
+
+PCFv2 security AD group convention pattern is used.
+
+AZ-              PCFv2-CORP-DEV-C_MA3-DTFU081-01-           READER
+
+| Azure | Subscription Name | Role Name |
+| --- | --- | --- |
+
+AZ-<Subscription name>-READER
+
+AZ-<Subscription name>-CONTRIBUTOR
+
+Example:
+
+DEV Environment
+
+Subscription Name - "PCFv2-CORP-DEV-C_MA3-DTFU081-01"
+
+AD Group Name - AZ-PCFv2-CORP-DEV-C_MA3-DTFU081-01-READER
+
+Group Description - [CreatedBy:HaCT][CreatedFor:<EAMID of Application>] Granting Reader access for users on subscription.
+
+AD Group Name - AZ-PCFv2-CORP-DEV-C_MA3-DTFU081-01-CONTRIBUTOR
+
+Group Description - [CreatedBy:HaCT][CreatedFor:<EAMID of Application>] Granting Contributor access for users on subscription.
+
+PROD Environment
+
+Subscription Name - "PCFv2-CORP-PRD-C_MA3-DTFU081-01"
+
+AD Group Name - AZ-PCFv2-CORP-PRD-C_MA3-DTFU081-01-READER
+
+Group Description - [CreatedBy:HaCT][CreatedFor:<EAMID of Application>] Granting Reader access for users on subscription.
+
+Remarks: Security AD Group created are only used for the purpose of ES@Uniper RBAC for application team members.
+
+## 11. Lifecycle & Evolution Considerations (OPTIONAL)
+
+### Validation – Break Glass account
+
+The procedure should be trained at least twice a year to make sure that everyone involved is aware of what to do in case of an emergency. As a result, every time it cannot be ruled out that one individual has access to both parts of the password, the password is changed.
+
+Discuss and Plan  with Service Owner on validation/training of Break Glass account.
+
+## 12. Out-of-Scope / Deferred Decisions (OPTIONAL)
+
+## 13. References
+
+### Supporting Documents
+
+| Document Name | Version |
+| --- | --- |
+| Azure Enterprise-Scale / PCF V2  <br>High Level Design Document <br> | Version 1.0 |
+
+Table 3: Supporting Documents
+
+### Policies and Initiatives
+
+Remarks – Description about the Initiatives and Policies are explained in the Governance LLD document.
+
+## 14. Source-only sections
+
+### Appendix – A Glossary
 
 | Abbreviation | Description |
 | --- | --- |
@@ -862,24 +884,22 @@ Application Managers must assess permitted users and give application team membe
 | Azure SP | Azure Service Principal |
 | IaC | Infrastructure as Code |
 
-## 13. Risks & Assumptions
+### Word Comments
 
-## 14. Design Constraints & Dependencies (OPTIONAL)
+Comment 1
 
-## 15. Lifecycle & Evolution Considerations (OPTIONAL)
+Author: Subramanian, Indhumathi
+Date: 2023-02-21T17:23:00Z
+Comment: Need to discuss with @Heil, Sebastian @Rajan, Varun @Chaliyavalapil, Ajith
 
-## 16. Out-of-Scope / Deferred Decisions (OPTIONAL)
+Comment 2
 
-## 17. References
+Author: Rajan, Varun
+Date: 2023-02-13T17:42:00Z
+Comment: @Chaliyavalapil, Ajith  PIM is for only User KIDs anything above reader. It will  not be applicable for SPNs .  @Subramanian, Indhumathi  Please re-phrase the sentence accordingly.
 
-### Supporting Documents
+Comment 3
 
-| Document Name | Version |
-| --- | --- |
-| Azure Enterprise-Scale / PCF V2  <br>High Level Design Document <br> | Version 1.0 |
-
-Table 3: Supporting Documents
-
-### Policies and Initiatives
-
-Remarks – Description about the Initiatives and Policies are explained in the Governance LLD document.
+Author: Subramanian, Indhumathi
+Date: 2023-02-24T13:55:00Z
+Comment: @Vamshi Krishna, Engala    - Could you please share us the details.  @Rajan, Varun @Dara, Venkata Nagapradeep Kumar
